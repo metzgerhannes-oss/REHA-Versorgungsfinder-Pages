@@ -46,7 +46,7 @@ input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padd
 
     <section class="box">
       <b><span class="step">1</span>Aktuelles Datenpaket herunterladen</b>
-      <div class="file"><a class="download disabled" id="downloadPackage" href="#" rel="noopener noreferrer">Paketablage öffnen</a></div>
+      <div class="file"><a class="download disabled" id="downloadPackage" href="#" rel="noopener noreferrer">Datenpaket v19.2 herunterladen</a></div>
       <div class="hint" id="packageHint">Das aktuelle verschlüsselte Datenpaket liegt in der internen SharePoint-Ablage. Dort bitte REHA-Vertragsmanager-v19.2.enc herunterladen.</div>
     </section>
 
@@ -79,7 +79,7 @@ const CURRENT_VERSION='v19.2';
 
 // Wird auf den internen, authentifizierungspflichtigen SharePoint-/Teams-Link gesetzt.
 // Kein anonymer Freigabelink und kein Zugangsschlüssel gehören hier hinein.
-const PACKAGE_DOWNLOAD_URL='https://ottobockglobal.sharepoint.com/:f:/t/REHA-Orga/IgBvL_C5IPhsRKpuGBCZnwVhAehpOU0Sjpc6n0VHlFAEWgw?e=gu8HMQ';
+const PACKAGE_DOWNLOAD_URL='https://ottobockglobal.sharepoint.com/teams/REHA-Orga/Shared%20Documents/Allgemeines/Vertragsnavigator/REHA-Vertragsmanager-v19.2.enc';
 
 const $=id=>document.getElementById(id);
 let selectedFile=null;
@@ -91,7 +91,7 @@ function configurePackageLink(){
   if(PACKAGE_DOWNLOAD_URL){
     a.href=PACKAGE_DOWNLOAD_URL;
     a.classList.remove('disabled');
-    $('packageHint').textContent='Die Paketablage öffnet SharePoint. Falls erforderlich, mit dem Firmenkonto anmelden und REHA-Vertragsmanager-v19.2.enc herunterladen.';
+    $('packageHint').textContent='Der Download öffnet die aktuelle v19.2-Datei in SharePoint. Falls erforderlich, mit dem Firmenkonto anmelden und die Datei herunterladen.';
   }else{
     a.removeAttribute('href');
     a.classList.add('disabled');
