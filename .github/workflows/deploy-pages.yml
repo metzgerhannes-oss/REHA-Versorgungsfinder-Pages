@@ -1,0 +1,69 @@
+name: Deploy REHA Vertragsnavigator Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: reha-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Öffentlichen Build prüfen
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s sw.js
+          test -s README.md
+
+          rm -rf _site
+          mkdir _site
+          cp index.html _site/index.html
+          cp sw.js _site/sw.js
+          cp README.md _site/README.txt
+          touch _site/.nojekyll
+
+          # Harte Schranke: Keine Vertrags- oder Datendateien dürfen veröffentlicht werden.
+          if find _site -type f | grep -E '\.(pdf|xlsx?|xlsm|csv|zip|enc|bin|json)$' >/dev/null; then
+            echo "Abbruch: sensible oder unerwartete Datendatei im Pages-Artefakt erkannt."
+            exit 1
+          fi
+
+          grep -q "REHA Vertragsnavigator" _site/index.html
+          grep -q "EXPECTED_SHA='38159a8507872e9b36a04752a3af72639bd668e5fa5c386fca7d32d5d9d43475'" _site/index.html
+          grep -q "serviceWorker.register('./sw.js'" _site/index.html
+
+      - name: GitHub Pages konfigurieren
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Pages-Artefakt hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: GitHub Pages veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v4
