@@ -18,7 +18,7 @@ input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padd
 </head>
 <body>
 <main>
-  <div class="brand"><div class="mark">B</div><div><b>REHA Vertragsnavigator</b><small>geschützter Hub-Zugang · v19.1</small></div></div>
+  <div class="brand"><div class="mark">B</div><div><b>REHA Vertragsnavigator</b><small>geschützter Hub-Zugang · v19.2</small></div></div>
   <h1>Vertragsmanager öffnen</h1>
   <p class="lead">Die Web-Oberfläche liegt im Hub. Vertrags-, Preis- und Dokumentdaten werden nicht öffentlich veröffentlicht. Auf einem neuen Gerät wird einmalig das verschlüsselte Datenpaket benötigt.</p>
 
@@ -42,13 +42,13 @@ input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padd
   <button class="primary" id="unlock" disabled>Entschlüsseln und einrichten</button>
   <div class="status" id="status"></div>
   <div class="progress" id="progressWrap" hidden><div class="bar" id="bar"></div></div>
-  <div class="meta"><span>Erwarteter Datenstand: v19.1 · 23.09.2026</span><span>Nur autorisierte Nutzung</span></div>
+  <div class="meta"><span>Erwarteter Datenstand: v19.2 · 23.09.2026</span><span>Nur autorisierte Nutzung</span></div>
 </main>
 <script>
 'use strict';
-const EXPECTED_SHA='c673b149b7470ba18c74b6b0b49a14bb92adee51d19ff86dbc5ab6156ab5fc84';
+const EXPECTED_SHA='56932bcc621087e9c6946678a183e9f5efeffbcb6d2eb71acda7e1ac02be659a';
 const AAD=new TextEncoder().encode('REHA-Vertragsmanager-v19-pages-targz');
-const CACHE='reha-v19-secure-20260923';
+const CACHE='reha-v19-secure-v19-2';
 const $=id=>document.getElementById(id);
 let selectedFile=null;
 const status=(msg,kind='')=>{ $('status').textContent=msg; $('status').className='status '+kind; };
@@ -81,11 +81,11 @@ async function cacheTarGz(gzBytes){
       files++; if(files%8===0) progress(55+Math.min(42,files/360*42));
     }
   }
-  await cache.put(new URL('app/.ready',location.href).href,new Response(JSON.stringify({version:'v19.1',date:'2026-09-23',files}),{headers:{'Content-Type':'application/json'}}));
+  await cache.put(new URL('app/.ready',location.href).href,new Response(JSON.stringify({version:'v19.2',date:'2026-09-23',files}),{headers:{'Content-Type':'application/json'}}));
   return files;
 }
 async function registerSW(){if(!('serviceWorker'in navigator))throw new Error('Service Worker wird von diesem Browser nicht unterstützt.');await navigator.serviceWorker.register('./sw.js',{scope:'./'});await navigator.serviceWorker.ready;}
-async function hasCache(){try{const c=await caches.open(CACHE);const r=await c.match(new URL('app/.ready',location.href).href);if(!r)return false;const m=await r.clone().json().catch(()=>null);return m?.version==='v19.1';}catch{return false;}}
+async function hasCache(){try{const c=await caches.open(CACHE);const r=await c.match(new URL('app/.ready',location.href).href);if(!r)return false;const m=await r.clone().json().catch(()=>null);return m?.version==='v19.2';}catch{return false;}}
 async function refreshState(){const ready=await hasCache();$('readyBox').hidden=!ready;$('setupBox').hidden=ready;$('keyBox').hidden=ready;$('unlock').hidden=ready;}
 $('payloadFile').addEventListener('change',e=>{selectedFile=e.target.files?.[0]||null;$('fileName').textContent=selectedFile?`${selectedFile.name} · ${(selectedFile.size/1024/1024).toFixed(1)} MB`:'Noch keine Datei gewählt';$('unlock').disabled=!(selectedFile&&$('accessKey').value.trim());});
 $('accessKey').addEventListener('input',()=>{$('unlock').disabled=!(selectedFile&&$('accessKey').value.trim());});
@@ -94,7 +94,7 @@ $('unlock').addEventListener('click',async()=>{
     $('unlock').disabled=true;status('Datenpaket wird geprüft …');progress(5);
     const fileBytes=new Uint8Array(await selectedFile.arrayBuffer());
     const digest=hex(await crypto.subtle.digest('SHA-256',fileBytes));
-    if(digest!==EXPECTED_SHA)throw new Error('Das ausgewählte Datenpaket entspricht nicht dem freigegebenen v19.1-Stand.');
+    if(digest!==EXPECTED_SHA)throw new Error('Das ausgewählte Datenpaket entspricht nicht dem freigegebenen v19.2-Stand.');
     progress(15);status('Datenpaket wird entschlüsselt …');
     const magic=new TextDecoder().decode(fileBytes.slice(0,5));if(magic!=='RV19T')throw new Error('Ungültiges Datenpaket.');
     const iv=fileBytes.slice(5,17), cipher=fileBytes.slice(17); const rawKey=b64urlBytes($('accessKey').value);
