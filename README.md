@@ -6,4 +6,4 @@ Es enthält keine Vertrags-, Preis-, Kassen-, IK- oder Vertragsdokumentdaten.
 Das freigegebene Datenpaket wird vom Benutzer lokal ausgewählt, im Browser entschlüsselt
 und anschließend ausschließlich im lokalen Cache Storage des Geräts abgelegt.
 
-Datenpaket-SHA256: c673b149b7470ba18c74b6b0b49a14bb92adee51d19ff86dbc5ab6156ab5fc84
+Datenpaket-SHA256: 56932bcc621087e9c6946678a183e9f5efeffbcb6d2eb71acda7e1ac02be659a
