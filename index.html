@@ -8,38 +8,63 @@
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17222b;background:#f4f6f7}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:linear-gradient(180deg,#fff 0,#f2f5f6 100%)}
-main{width:min(720px,calc(100% - 32px));background:#fff;border:1px solid #d9e0e3;border-radius:20px;box-shadow:0 18px 55px rgba(20,40,50,.12);padding:34px}
+main{width:min(760px,calc(100% - 32px));background:#fff;border:1px solid #d9e0e3;border-radius:20px;box-shadow:0 18px 55px rgba(20,40,50,.12);padding:34px}
 .brand{display:flex;align-items:center;gap:14px;margin-bottom:26px}.mark{width:48px;height:48px;border-radius:12px;background:#e50046;color:#fff;display:grid;place-items:center;font-weight:800;font-size:24px}.brand b{font-size:20px}.brand small{display:block;color:#66727a;margin-top:2px}
-h1{font-size:30px;margin:0 0 10px}.lead{color:#52616a;line-height:1.55;margin:0 0 26px}.box{border:1px solid #dce3e6;border-radius:14px;padding:18px;background:#fafbfb;margin:14px 0}.box b{display:block;margin-bottom:8px}.row{display:grid;gap:12px}.file{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.file span{color:#637078;font-size:14px;overflow-wrap:anywhere}
-button,.fakebtn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;font:inherit}.primary{background:#e50046;color:#fff}.secondary{background:#e9eef0;color:#24323a}.primary:disabled{opacity:.45;cursor:not-allowed}
-input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padding:12px 13px;font:inherit;background:#fff}.hint{font-size:13px;color:#6c787f;line-height:1.45;margin-top:8px}.status{min-height:24px;margin-top:18px;font-weight:650}.status.error{color:#ad1d32}.status.ok{color:#157347}.progress{height:9px;border-radius:99px;background:#e6ebed;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:#e50046;transition:width .2s}.meta{display:flex;justify-content:space-between;gap:12px;color:#77838a;font-size:12px;margin-top:24px;border-top:1px solid #e7ecee;padding-top:16px}.hidden{display:none!important}
-@media(max-width:600px){main{padding:22px}h1{font-size:25px}.meta{display:block}.meta span{display:block;margin-top:5px}}
+h1{font-size:30px;margin:0 0 10px}h2{font-size:20px;margin:26px 0 8px}.lead{color:#52616a;line-height:1.55;margin:0 0 22px}
+.box{border:1px solid #dce3e6;border-radius:14px;padding:18px;background:#fafbfb;margin:14px 0}.box b{display:block;margin-bottom:8px}.box.update{border-color:#f0c36a;background:#fff9ec}
+.file{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.file span{color:#637078;font-size:14px;overflow-wrap:anywhere}
+button,.fakebtn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;font:inherit;text-decoration:none;display:inline-block}
+.primary{background:#e50046;color:#fff}.secondary{background:#e9eef0;color:#24323a}.download{background:#0067b9;color:#fff}
+button:disabled,.disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padding:12px 13px;font:inherit;background:#fff}
+.hint{font-size:13px;color:#6c787f;line-height:1.45;margin-top:8px}.step{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#e9eef0;margin-right:8px;font-size:13px}
+.status{min-height:24px;margin-top:18px;font-weight:650}.status.error{color:#ad1d32}.status.ok{color:#157347}
+.progress{height:9px;border-radius:99px;background:#e6ebed;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:#e50046;transition:width .2s}
+.meta{display:flex;justify-content:space-between;gap:12px;color:#77838a;font-size:12px;margin-top:24px;border-top:1px solid #e7ecee;padding-top:16px}.hidden{display:none!important}
+@media(max-width:600px){main{padding:22px}h1{font-size:25px}.meta{display:block}.meta span{display:block;margin-top:5px}.file>*{width:100%;text-align:center}}
 </style>
 </head>
 <body>
 <main>
   <div class="brand"><div class="mark">B</div><div><b>REHA Vertragsnavigator</b><small>geschützter Hub-Zugang · v19.2</small></div></div>
   <h1>Vertragsmanager öffnen</h1>
-  <p class="lead">Die Web-Oberfläche liegt im Hub. Vertrags-, Preis- und Dokumentdaten werden nicht öffentlich veröffentlicht. Auf einem neuen Gerät wird einmalig das verschlüsselte Datenpaket benötigt.</p>
+  <p class="lead">Vertrags-, Preis- und Dokumentdaten werden nicht öffentlich veröffentlicht. Auf einem neuen Gerät wird der freigegebene Datenstand einmalig lokal eingerichtet.</p>
 
   <section class="box" id="readyBox" hidden>
     <b>Dieses Gerät ist eingerichtet.</b>
     <div class="file"><button class="primary" id="openCached">Vertragsmanager öffnen</button><button class="secondary" id="resetCache">Lokale Daten löschen</button></div>
-    <div class="hint">Der freigegebene Datenstand liegt verschlüsselt übertragen und anschließend nur im Browser-Cache dieses Geräts.</div>
+    <div class="hint">Der freigegebene Datenstand liegt ausschließlich im lokalen Browser-Cache dieses Geräts.</div>
   </section>
 
-  <section class="box" id="setupBox">
-    <b>1. Verschlüsseltes Datenpaket auswählen</b>
-    <div class="file"><label class="fakebtn secondary" for="payloadFile">Datei auswählen</label><input class="hidden" id="payloadFile" type="file" accept=".enc,application/octet-stream"><span id="fileName">Noch keine Datei gewählt</span></div>
-  </section>
+  <div id="setupFlow">
+    <section class="box update" id="updateBox" hidden>
+      <b>Datenupdate erforderlich</b>
+      <div class="hint">Auf diesem Gerät wurde ein älterer Datenstand gefunden. Bitte das aktuelle Paket herunterladen und erneut einrichten.</div>
+    </section>
 
-  <section class="box" id="keyBox">
-    <b>2. Zugangsschlüssel eingeben</b>
-    <input id="accessKey" type="password" autocomplete="off" spellcheck="false" placeholder="43-stelliger Zugangsschlüssel">
-    <div class="hint">Der Schlüssel wird nicht an GitHub übertragen und nicht dauerhaft im Hub gespeichert.</div>
-  </section>
+    <h2>Neues Gerät einrichten</h2>
 
-  <button class="primary" id="unlock" disabled>Entschlüsseln und einrichten</button>
+    <section class="box">
+      <b><span class="step">1</span>Aktuelles Datenpaket herunterladen</b>
+      <div class="file"><a class="download disabled" id="downloadPackage" href="#" rel="noopener noreferrer">Datenpaket v19.2 herunterladen</a></div>
+      <div class="hint" id="packageHint">Der interne Download-Link wird hier bereitgestellt. Das Paket bleibt verschlüsselt und wird erst auf diesem Gerät entschlüsselt.</div>
+    </section>
+
+    <section class="box" id="setupBox">
+      <b><span class="step">2</span>Heruntergeladene Datei auswählen</b>
+      <div class="file"><label class="fakebtn secondary" for="payloadFile">Datei auswählen</label><input class="hidden" id="payloadFile" type="file" accept=".enc,application/octet-stream"><span id="fileName">Noch keine Datei gewählt</span></div>
+      <div class="hint">Erwartete Datei: REHA-Vertragsmanager-v19.2.enc</div>
+    </section>
+
+    <section class="box" id="keyBox">
+      <b><span class="step">3</span>Zugangsschlüssel eingeben</b>
+      <input id="accessKey" type="password" autocomplete="off" spellcheck="false" placeholder="43-stelliger Zugangsschlüssel">
+      <div class="hint">Der Zugangsschlüssel wird separat verteilt, nicht an GitHub übertragen und nicht dauerhaft gespeichert.</div>
+    </section>
+
+    <button class="primary" id="unlock" disabled>Gerät einrichten</button>
+  </div>
+
   <div class="status" id="status"></div>
   <div class="progress" id="progressWrap" hidden><div class="bar" id="bar"></div></div>
   <div class="meta"><span>Erwarteter Datenstand: v19.2 · 23.09.2026</span><span>Nur autorisierte Nutzung</span></div>
@@ -49,22 +74,44 @@ input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padd
 const EXPECTED_SHA='56932bcc621087e9c6946678a183e9f5efeffbcb6d2eb71acda7e1ac02be659a';
 const AAD=new TextEncoder().encode('REHA-Vertragsmanager-v19-pages-targz');
 const CACHE='reha-v19-secure-v19-2';
+const CACHE_PREFIX='reha-v19-secure-';
+const CURRENT_VERSION='v19.2';
+
+// Wird auf den internen, authentifizierungspflichtigen SharePoint-/Teams-Link gesetzt.
+// Kein anonymer Freigabelink und kein Zugangsschlüssel gehören hier hinein.
+const PACKAGE_DOWNLOAD_URL='';
+
 const $=id=>document.getElementById(id);
 let selectedFile=null;
 const status=(msg,kind='')=>{ $('status').textContent=msg; $('status').className='status '+kind; };
 const progress=n=>{ $('progressWrap').hidden=false; $('bar').style.width=Math.max(0,Math.min(100,n))+'%'; };
+
+function configurePackageLink(){
+  const a=$('downloadPackage');
+  if(PACKAGE_DOWNLOAD_URL){
+    a.href=PACKAGE_DOWNLOAD_URL;
+    a.classList.remove('disabled');
+    $('packageHint').textContent='Der Download öffnet den internen Paketablageort. Falls erforderlich, mit dem Firmenkonto anmelden.';
+  }else{
+    a.removeAttribute('href');
+    a.classList.add('disabled');
+    $('packageHint').textContent='Interner Paketablageort noch nicht verknüpft. Bis dahin kann ein bereits erhaltenes v19.2-Paket direkt in Schritt 2 ausgewählt werden.';
+  }
+}
+
 function b64urlBytes(s){ s=s.trim().replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4)s+='='; const raw=atob(s); return Uint8Array.from(raw,c=>c.charCodeAt(0)); }
 function hex(buf){return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}
 function text(bytes){return new TextDecoder('utf-8').decode(bytes).replace(/\0.*$/s,'');}
 function octal(bytes){const s=text(bytes).trim().replace(/\0/g,''); return s?parseInt(s,8)||0:0;}
 function mime(path){const e=(path.split('.').pop()||'').toLowerCase();return ({html:'text/html; charset=utf-8',js:'text/javascript; charset=utf-8',css:'text/css; charset=utf-8',json:'application/json; charset=utf-8',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',svg:'image/svg+xml',pdf:'application/pdf',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',xls:'application/vnd.ms-excel',txt:'text/plain; charset=utf-8',webmanifest:'application/manifest+json'}[e]||'application/octet-stream');}
 function parsePax(bytes){const s=new TextDecoder().decode(bytes);const out={};let p=0;while(p<s.length){const sp=s.indexOf(' ',p);if(sp<0)break;const len=parseInt(s.slice(p,sp),10);if(!len)break;const rec=s.slice(sp+1,p+len-1);const eq=rec.indexOf('=');if(eq>0)out[rec.slice(0,eq)]=rec.slice(eq+1);p+=len;}return out;}
+
 async function cacheTarGz(gzBytes){
   if(!('DecompressionStream' in window)) throw new Error('Dieser Browser unterstützt die benötigte lokale Dekomprimierung nicht. Bitte aktuellen Edge/Chrome verwenden.');
   const cache=await caches.open(CACHE);
   const reader=new Blob([gzBytes]).stream().pipeThrough(new DecompressionStream('gzip')).getReader();
-  let buf=new Uint8Array(0), done=false, nextPath='', files=0, totalRead=0;
-  async function fill(n){while(buf.length<n&&!done){const r=await reader.read();done=r.done;if(r.value){const nb=new Uint8Array(buf.length+r.value.length);nb.set(buf);nb.set(r.value,buf.length);buf=nb;totalRead+=r.value.length;}}}
+  let buf=new Uint8Array(0), done=false, nextPath='', files=0;
+  async function fill(n){while(buf.length<n&&!done){const r=await reader.read();done=r.done;if(r.value){const nb=new Uint8Array(buf.length+r.value.length);nb.set(buf);nb.set(r.value,buf.length);buf=nb;}}}
   async function take(n){await fill(n);if(buf.length<n)throw new Error('Datenpaket unvollständig.');const out=buf.slice(0,n);buf=buf.slice(n);return out;}
   while(true){
     const h=await take(512); if(h.every(b=>b===0)) break;
@@ -81,14 +128,36 @@ async function cacheTarGz(gzBytes){
       files++; if(files%8===0) progress(55+Math.min(42,files/360*42));
     }
   }
-  await cache.put(new URL('app/.ready',location.href).href,new Response(JSON.stringify({version:'v19.2',date:'2026-09-23',files}),{headers:{'Content-Type':'application/json'}}));
+  await cache.put(new URL('app/.ready',location.href).href,new Response(JSON.stringify({version:CURRENT_VERSION,date:'2026-09-23',files}),{headers:{'Content-Type':'application/json'}}));
   return files;
 }
+
 async function registerSW(){if(!('serviceWorker'in navigator))throw new Error('Service Worker wird von diesem Browser nicht unterstützt.');await navigator.serviceWorker.register('./sw.js',{scope:'./'});await navigator.serviceWorker.ready;}
-async function hasCache(){try{const c=await caches.open(CACHE);const r=await c.match(new URL('app/.ready',location.href).href);if(!r)return false;const m=await r.clone().json().catch(()=>null);return m?.version==='v19.2';}catch{return false;}}
-async function refreshState(){const ready=await hasCache();$('readyBox').hidden=!ready;$('setupBox').hidden=ready;$('keyBox').hidden=ready;$('unlock').hidden=ready;}
-$('payloadFile').addEventListener('change',e=>{selectedFile=e.target.files?.[0]||null;$('fileName').textContent=selectedFile?`${selectedFile.name} · ${(selectedFile.size/1024/1024).toFixed(1)} MB`:'Noch keine Datei gewählt';$('unlock').disabled=!(selectedFile&&$('accessKey').value.trim());});
+
+async function cacheState(){
+  try{
+    const current=await caches.open(CACHE);
+    const r=await current.match(new URL('app/.ready',location.href).href);
+    if(r){const m=await r.clone().json().catch(()=>null);if(m?.version===CURRENT_VERSION)return {ready:true,old:false};}
+    const keys=await caches.keys();
+    return {ready:false,old:keys.some(k=>k.startsWith(CACHE_PREFIX)&&k!==CACHE)};
+  }catch{return {ready:false,old:false};}
+}
+
+async function refreshState(){
+  const state=await cacheState();
+  $('readyBox').hidden=!state.ready;
+  $('setupFlow').hidden=state.ready;
+  $('updateBox').hidden=!state.old;
+}
+
+$('payloadFile').addEventListener('change',e=>{
+  selectedFile=e.target.files?.[0]||null;
+  $('fileName').textContent=selectedFile?`${selectedFile.name} · ${(selectedFile.size/1024/1024).toFixed(1)} MB`:'Noch keine Datei gewählt';
+  $('unlock').disabled=!(selectedFile&&$('accessKey').value.trim());
+});
 $('accessKey').addEventListener('input',()=>{$('unlock').disabled=!(selectedFile&&$('accessKey').value.trim());});
+
 $('unlock').addEventListener('click',async()=>{
   try{
     $('unlock').disabled=true;status('Datenpaket wird geprüft …');progress(5);
@@ -102,13 +171,22 @@ $('unlock').addEventListener('click',async()=>{
     const key=await crypto.subtle.importKey('raw',rawKey,{name:'AES-GCM'},false,['decrypt']);
     let plain;try{plain=await crypto.subtle.decrypt({name:'AES-GCM',iv,additionalData:AAD},key,cipher);}catch{throw new Error('Zugangsschlüssel ist nicht korrekt.');}
     progress(50);status('Vertragsdaten werden lokal eingerichtet …');
-    await registerSW(); const count=await cacheTarGz(new Uint8Array(plain)); plain=null;
+    await registerSW();
+    const count=await cacheTarGz(new Uint8Array(plain)); plain=null;
     progress(100);status(`${count} Dateien eingerichtet. Vertragsmanager wird geöffnet …`,'ok');
     setTimeout(()=>location.href='./app/index.html',450);
   }catch(e){status(e?.message||String(e),'error');$('unlock').disabled=false;$('progressWrap').hidden=true;}
 });
+
 $('openCached').addEventListener('click',async()=>{await registerSW();location.href='./app/index.html';});
-$('resetCache').addEventListener('click',async()=>{await caches.delete(CACHE);status('Lokale Vertragsdaten wurden gelöscht.','ok');await refreshState();});
+$('resetCache').addEventListener('click',async()=>{
+  const keys=await caches.keys();
+  await Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)).map(k=>caches.delete(k)));
+  status('Lokale Vertragsdaten wurden gelöscht.','ok');
+  await refreshState();
+});
+
+configurePackageLink();
 registerSW().catch(()=>{}).finally(refreshState);
 </script>
 </body>
