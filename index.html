@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>REHA Vertragsnavigator</title>
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17222b;background:#f4f6f7}
@@ -46,8 +49,8 @@ input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padd
 
     <section class="box">
       <b><span class="step">1</span>Aktuelles Datenpaket herunterladen</b>
-      <div class="file"><a class="download disabled" id="downloadPackage" href="#" rel="noopener noreferrer">Datenpaket v19.2 herunterladen</a></div>
-      <div class="hint" id="packageHint">Das aktuelle verschlüsselte Datenpaket liegt in der internen SharePoint-Ablage. Dort bitte REHA-Vertragsmanager-v19.2.enc herunterladen.</div>
+      <div class="file"><a class="download" id="downloadPackage" href="https://ottobockglobal.sharepoint.com/teams/REHA-Orga/Shared%20Documents/Allgemeines/Vertragsnavigator/REHA-Vertragsmanager-v19.2.enc?web=1" rel="noopener noreferrer">Datenpaket v19.2 herunterladen</a></div>
+      <div class="hint" id="packageHint">Öffnet die interne SharePoint-Datei. Falls erforderlich, mit dem Firmenkonto anmelden und REHA-Vertragsmanager-v19.2.enc herunterladen.</div>
     </section>
 
     <section class="box" id="setupBox">
@@ -77,27 +80,10 @@ const CACHE='reha-v19-secure-v19-2';
 const CACHE_PREFIX='reha-v19-secure-';
 const CURRENT_VERSION='v19.2';
 
-// Wird auf den internen, authentifizierungspflichtigen SharePoint-/Teams-Link gesetzt.
-// Kein anonymer Freigabelink und kein Zugangsschlüssel gehören hier hinein.
-const PACKAGE_DOWNLOAD_URL='https://ottobockglobal.sharepoint.com/teams/REHA-Orga/Shared%20Documents/Allgemeines/Vertragsnavigator/REHA-Vertragsmanager-v19.2.enc';
-
 const $=id=>document.getElementById(id);
 let selectedFile=null;
 const status=(msg,kind='')=>{ $('status').textContent=msg; $('status').className='status '+kind; };
 const progress=n=>{ $('progressWrap').hidden=false; $('bar').style.width=Math.max(0,Math.min(100,n))+'%'; };
-
-function configurePackageLink(){
-  const a=$('downloadPackage');
-  if(PACKAGE_DOWNLOAD_URL){
-    a.href=PACKAGE_DOWNLOAD_URL;
-    a.classList.remove('disabled');
-    $('packageHint').textContent='Der Download öffnet die aktuelle v19.2-Datei in SharePoint. Falls erforderlich, mit dem Firmenkonto anmelden und die Datei herunterladen.';
-  }else{
-    a.removeAttribute('href');
-    a.classList.add('disabled');
-    $('packageHint').textContent='Interner Paketablageort noch nicht verknüpft. Bis dahin kann ein bereits erhaltenes v19.2-Paket direkt in Schritt 2 ausgewählt werden.';
-  }
-}
 
 function b64urlBytes(s){ s=s.trim().replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4)s+='='; const raw=atob(s); return Uint8Array.from(raw,c=>c.charCodeAt(0)); }
 function hex(buf){return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}
@@ -186,7 +172,6 @@ $('resetCache').addEventListener('click',async()=>{
   await refreshState();
 });
 
-configurePackageLink();
 registerSW().catch(()=>{}).finally(refreshState);
 </script>
 </body>
