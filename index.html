@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>REHA Vertragsnavigator</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17222b;background:#f4f6f7}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:linear-gradient(180deg,#fff 0,#f2f5f6 100%)}
+main{width:min(720px,calc(100% - 32px));background:#fff;border:1px solid #d9e0e3;border-radius:20px;box-shadow:0 18px 55px rgba(20,40,50,.12);padding:34px}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:26px}.mark{width:48px;height:48px;border-radius:12px;background:#e50046;color:#fff;display:grid;place-items:center;font-weight:800;font-size:24px}.brand b{font-size:20px}.brand small{display:block;color:#66727a;margin-top:2px}
+h1{font-size:30px;margin:0 0 10px}.lead{color:#52616a;line-height:1.55;margin:0 0 26px}.box{border:1px solid #dce3e6;border-radius:14px;padding:18px;background:#fafbfb;margin:14px 0}.box b{display:block;margin-bottom:8px}.row{display:grid;gap:12px}.file{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.file span{color:#637078;font-size:14px;overflow-wrap:anywhere}
+button,.fakebtn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;font:inherit}.primary{background:#e50046;color:#fff}.secondary{background:#e9eef0;color:#24323a}.primary:disabled{opacity:.45;cursor:not-allowed}
+input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padding:12px 13px;font:inherit;background:#fff}.hint{font-size:13px;color:#6c787f;line-height:1.45;margin-top:8px}.status{min-height:24px;margin-top:18px;font-weight:650}.status.error{color:#ad1d32}.status.ok{color:#157347}.progress{height:9px;border-radius:99px;background:#e6ebed;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:#e50046;transition:width .2s}.meta{display:flex;justify-content:space-between;gap:12px;color:#77838a;font-size:12px;margin-top:24px;border-top:1px solid #e7ecee;padding-top:16px}.hidden{display:none!important}
+@media(max-width:600px){main{padding:22px}h1{font-size:25px}.meta{display:block}.meta span{display:block;margin-top:5px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><div class="mark">B</div><div><b>REHA Vertragsnavigator</b><small>geschützter Hub-Zugang · v19.0</small></div></div>
+  <h1>Vertragsmanager öffnen</h1>
+  <p class="lead">Die Web-Oberfläche liegt im Hub. Vertrags-, Preis- und Dokumentdaten werden nicht öffentlich veröffentlicht. Auf einem neuen Gerät wird einmalig das verschlüsselte Datenpaket benötigt.</p>
+
+  <section class="box" id="readyBox" hidden>
+    <b>Dieses Gerät ist eingerichtet.</b>
+    <div class="file"><button class="primary" id="openCached">Vertragsmanager öffnen</button><button class="secondary" id="resetCache">Lokale Daten löschen</button></div>
+    <div class="hint">Der freigegebene Datenstand liegt verschlüsselt übertragen und anschließend nur im Browser-Cache dieses Geräts.</div>
+  </section>
+
+  <section class="box" id="setupBox">
+    <b>1. Verschlüsseltes Datenpaket auswählen</b>
+    <div class="file"><label class="fakebtn secondary" for="payloadFile">Datei auswählen</label><input class="hidden" id="payloadFile" type="file" accept=".enc,application/octet-stream"><span id="fileName">Noch keine Datei gewählt</span></div>
+  </section>
+
+  <section class="box" id="keyBox">
+    <b>2. Zugangsschlüssel eingeben</b>
+    <input id="accessKey" type="password" autocomplete="off" spellcheck="false" placeholder="43-stelliger Zugangsschlüssel">
+    <div class="hint">Der Schlüssel wird nicht an GitHub übertragen und nicht dauerhaft im Hub gespeichert.</div>
+  </section>
+
+  <button class="primary" id="unlock" disabled>Entschlüsseln und einrichten</button>
+  <div class="status" id="status"></div>
+  <div class="progress" id="progressWrap" hidden><div class="bar" id="bar"></div></div>
+  <div class="meta"><span>Erwarteter Datenstand: v19.0 · 23.09.2026</span><span>Nur autorisierte Nutzung</span></div>
+</main>
+<script>
+'use strict';
+const EXPECTED_SHA='38159a8507872e9b36a04752a3af72639bd668e5fa5c386fca7d32d5d9d43475';
+const AAD=new TextEncoder().encode('REHA-Vertragsmanager-v19-pages-targz');
+const CACHE='reha-v19-secure-20260923';
+const $=id=>document.getElementById(id);
+let selectedFile=null;
+const status=(msg,kind='')=>{ $('status').textContent=msg; $('status').className='status '+kind; };
+const progress=n=>{ $('progressWrap').hidden=false; $('bar').style.width=Math.max(0,Math.min(100,n))+'%'; };
+function b64urlBytes(s){ s=s.trim().replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4)s+='='; const raw=atob(s); return Uint8Array.from(raw,c=>c.charCodeAt(0)); }
+function hex(buf){return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+function text(bytes){return new TextDecoder('utf-8').decode(bytes).replace(/\0.*$/s,'');}
+function octal(bytes){const s=text(bytes).trim().replace(/\0/g,''); return s?parseInt(s,8)||0:0;}
+function mime(path){const e=(path.split('.').pop()||'').toLowerCase();return ({html:'text/html; charset=utf-8',js:'text/javascript; charset=utf-8',css:'text/css; charset=utf-8',json:'application/json; charset=utf-8',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',svg:'image/svg+xml',pdf:'application/pdf',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',xls:'application/vnd.ms-excel',txt:'text/plain; charset=utf-8',webmanifest:'application/manifest+json'}[e]||'application/octet-stream');}
+function parsePax(bytes){const s=new TextDecoder().decode(bytes);const out={};let p=0;while(p<s.length){const sp=s.indexOf(' ',p);if(sp<0)break;const len=parseInt(s.slice(p,sp),10);if(!len)break;const rec=s.slice(sp+1,p+len-1);const eq=rec.indexOf('=');if(eq>0)out[rec.slice(0,eq)]=rec.slice(eq+1);p+=len;}return out;}
+async function cacheTarGz(gzBytes){
+  if(!('DecompressionStream' in window)) throw new Error('Dieser Browser unterstützt die benötigte lokale Dekomprimierung nicht. Bitte aktuellen Edge/Chrome verwenden.');
+  const cache=await caches.open(CACHE);
+  const reader=new Blob([gzBytes]).stream().pipeThrough(new DecompressionStream('gzip')).getReader();
+  let buf=new Uint8Array(0), done=false, nextPath='', files=0, totalRead=0;
+  async function fill(n){while(buf.length<n&&!done){const r=await reader.read();done=r.done;if(r.value){const nb=new Uint8Array(buf.length+r.value.length);nb.set(buf);nb.set(r.value,buf.length);buf=nb;totalRead+=r.value.length;}}}
+  async function take(n){await fill(n);if(buf.length<n)throw new Error('Datenpaket unvollständig.');const out=buf.slice(0,n);buf=buf.slice(n);return out;}
+  while(true){
+    const h=await take(512); if(h.every(b=>b===0)) break;
+    let name=text(h.slice(0,100)); const prefix=text(h.slice(345,500)); if(prefix)name=prefix+'/'+name;
+    const size=octal(h.slice(124,136)); const type=String.fromCharCode(h[156]||48);
+    const body=await take(size); const pad=(512-(size%512))%512; if(pad)await take(pad);
+    if(type==='x'||type==='g'){const pax=parsePax(body);if(pax.path)nextPath=pax.path;continue;}
+    if(type==='L'){nextPath=text(body).replace(/\0/g,'').trim();continue;}
+    const path=(nextPath||name).replace(/^\.\//,''); nextPath='';
+    if(type==='5'||!path)continue;
+    if(type==='0'||type==='\0'||type==='7'){
+      const url=new URL('app/'+path,location.href).href;
+      await cache.put(url,new Response(body,{headers:{'Content-Type':mime(path),'Cache-Control':'private, max-age=31536000, immutable'}}));
+      files++; if(files%8===0) progress(55+Math.min(42,files/360*42));
+    }
+  }
+  await cache.put(new URL('app/.ready',location.href).href,new Response(JSON.stringify({version:'v19.0',date:'2026-09-23',files}),{headers:{'Content-Type':'application/json'}}));
+  return files;
+}
+async function registerSW(){if(!('serviceWorker'in navigator))throw new Error('Service Worker wird von diesem Browser nicht unterstützt.');await navigator.serviceWorker.register('./sw.js',{scope:'./'});await navigator.serviceWorker.ready;}
+async function hasCache(){try{const c=await caches.open(CACHE);return !!(await c.match(new URL('app/.ready',location.href).href));}catch{return false;}}
+async function refreshState(){const ready=await hasCache();$('readyBox').hidden=!ready;$('setupBox').hidden=ready;$('keyBox').hidden=ready;$('unlock').hidden=ready;}
+$('payloadFile').addEventListener('change',e=>{selectedFile=e.target.files?.[0]||null;$('fileName').textContent=selectedFile?`${selectedFile.name} · ${(selectedFile.size/1024/1024).toFixed(1)} MB`:'Noch keine Datei gewählt';$('unlock').disabled=!(selectedFile&&$('accessKey').value.trim());});
+$('accessKey').addEventListener('input',()=>{$('unlock').disabled=!(selectedFile&&$('accessKey').value.trim());});
+$('unlock').addEventListener('click',async()=>{
+  try{
+    $('unlock').disabled=true;status('Datenpaket wird geprüft …');progress(5);
+    const fileBytes=new Uint8Array(await selectedFile.arrayBuffer());
+    const digest=hex(await crypto.subtle.digest('SHA-256',fileBytes));
+    if(digest!==EXPECTED_SHA)throw new Error('Das ausgewählte Datenpaket entspricht nicht dem freigegebenen v19.0-Stand.');
+    progress(15);status('Datenpaket wird entschlüsselt …');
+    const magic=new TextDecoder().decode(fileBytes.slice(0,5));if(magic!=='RV19T')throw new Error('Ungültiges Datenpaket.');
+    const iv=fileBytes.slice(5,17), cipher=fileBytes.slice(17); const rawKey=b64urlBytes($('accessKey').value);
+    if(rawKey.length!==32)throw new Error('Zugangsschlüssel hat nicht das erwartete Format.');
+    const key=await crypto.subtle.importKey('raw',rawKey,{name:'AES-GCM'},false,['decrypt']);
+    let plain;try{plain=await crypto.subtle.decrypt({name:'AES-GCM',iv,additionalData:AAD},key,cipher);}catch{throw new Error('Zugangsschlüssel ist nicht korrekt.');}
+    progress(50);status('Vertragsdaten werden lokal eingerichtet …');
+    await registerSW(); const count=await cacheTarGz(new Uint8Array(plain)); plain=null;
+    progress(100);status(`${count} Dateien eingerichtet. Vertragsmanager wird geöffnet …`,'ok');
+    setTimeout(()=>location.href='./app/index.html',450);
+  }catch(e){status(e?.message||String(e),'error');$('unlock').disabled=false;$('progressWrap').hidden=true;}
+});
+$('openCached').addEventListener('click',async()=>{await registerSW();location.href='./app/index.html';});
+$('resetCache').addEventListener('click',async()=>{await caches.delete(CACHE);status('Lokale Vertragsdaten wurden gelöscht.','ok');await refreshState();});
+registerSW().catch(()=>{}).finally(refreshState);
+</script>
+</body>
+</html>
