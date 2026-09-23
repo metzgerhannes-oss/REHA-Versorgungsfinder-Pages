@@ -1,4 +1,4 @@
-REHA Vertragsnavigator v19.2 – Secure Pages Shell
+REHA Vertragsnavigator v19.3 – Secure Pages Shell
 
 Dieses öffentliche Repository enthält ausschließlich die technische Startoberfläche.
 Es enthält keine Vertrags-, Preis-, Kassen-, IK- oder Vertragsdokumentdaten.
@@ -18,4 +18,4 @@ Sicherheitsregeln:
 - Der Paket-Link darf nur auf einen internen, authentifizierungspflichtigen Ablageort verweisen.
 - Alte lokale Datenstände werden erkannt und führen zurück in den Einrichtungs-/Update-Ablauf.
 
-Datenpaket-SHA256: 56932bcc621087e9c6946678a183e9f5efeffbcb6d2eb71acda7e1ac02be659a
+Datenpaket-SHA256: 425231efaba2176e1df1f1b5e5136ea92e181eab7c95efd829c7b5df3ba64001
