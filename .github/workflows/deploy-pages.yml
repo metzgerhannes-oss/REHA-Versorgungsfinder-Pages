@@ -44,7 +44,7 @@ jobs:
           fi
 
           grep -q "REHA Vertragsnavigator" _site/index.html
-          grep -q "EXPECTED_SHA='e3a2be08a9e0a6125e9737a204b4dee89ce29a8e8250fbd4c9662b7409fdb920'" _site/index.html
+          grep -q "EXPECTED_SHA='c673b149b7470ba18c74b6b0b49a14bb92adee51d19ff86dbc5ab6156ab5fc84'" _site/index.html
           grep -q "serviceWorker.register('./sw.js'" _site/index.html
 
       - name: GitHub Pages konfigurieren
