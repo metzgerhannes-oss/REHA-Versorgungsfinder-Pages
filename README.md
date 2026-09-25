@@ -18,4 +18,4 @@ Sicherheitsregeln:
 - Der Paket-Link darf nur auf einen internen, authentifizierungspflichtigen Ablageort verweisen.
 - Alte lokale Datenstände werden erkannt und führen zurück in den Einrichtungs-/Update-Ablauf.
 
-Datenpaket-SHA256: ab0456901048c2a397014a6fabbedbbd95aa292be40b248a603c556492dd4c34
+Datenpaket-SHA256: 4f14c85d5b69bd92a6fa15d73d551d6ae36f2a6c1655fd2c37095443a6fbdefa
