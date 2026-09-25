@@ -98,6 +98,7 @@ const CACHE_PREFIX='reha-v19-secure-';
 const CURRENT_VERSION='v19.4';
 const META_CACHE='reha-v19-meta';
 const DYNAMIC_CACHE_PREFIX='reha-v19-package-';
+const STAGE_CACHE='reha-v19-update-stage';
 const SETTINGS_DB='reha-v19-settings';
 const SETTINGS_STORE='settings';
 const ACTIVE_POINTER_URL=new URL('app/.active-cache',location.href).href;
@@ -213,24 +214,26 @@ async function registerSW(){
 }
 async function cacheState(){
   try{
-    const pointer=await readPointer();
-    if(pointer&&pointer.cacheName){
-      const c=await caches.open(pointer.cacheName);
-      const r=await c.match(READY_URL);
-      if(r){const m=await r.clone().json().catch(()=>null);if(m)return Object.assign({ready:true,old:false,cacheName:pointer.cacheName},m);}
-    }
     const current=await caches.open(CACHE);
     const r=await current.match(READY_URL);
-    if(r){const m=await r.clone().json().catch(()=>null);if(m)return Object.assign({ready:true,old:false,cacheName:CACHE},m);}
-    const keys=await caches.keys();
-    const legacy=keys.filter(k=>k.startsWith(CACHE_PREFIX)).sort().reverse();
-    for(const k of legacy){
-      const c=await caches.open(k);const rr=await c.match(READY_URL);
-      if(rr){const m=await rr.clone().json().catch(()=>null);if(m)return Object.assign({ready:true,old:m.version!==CURRENT_VERSION,cacheName:k},m);}
+    if(r){
+      const m=await r.clone().json().catch(()=>null);
+      if(m)return Object.assign({ready:true,old:false,cacheName:CACHE},m);
     }
-    return {ready:false,old:keys.some(k=>k.startsWith(CACHE_PREFIX)||k.startsWith(DYNAMIC_CACHE_PREFIX))};
+    const keys=await caches.keys();
+    const legacy=keys.filter(k=>k.startsWith(CACHE_PREFIX)&&k!==CACHE).sort().reverse();
+    for(const k of legacy){
+      const c=await caches.open(k);
+      const rr=await c.match(READY_URL);
+      if(rr){
+        const m=await rr.clone().json().catch(()=>null);
+        if(m)return Object.assign({ready:true,old:m.version!==CURRENT_VERSION,cacheName:k},m);
+      }
+    }
+    return {ready:false,old:keys.some(k=>k.startsWith(CACHE_PREFIX)||k===STAGE_CACHE)};
   }catch{return {ready:false,old:false};}
 }
+
 async function refreshState(){
   const state=await cacheState();
   $('readyBox').hidden=!state.ready;
@@ -272,6 +275,31 @@ async function updateFolderUI(){
     ?'Verbunden: '+handle.name+'. Beim Öffnen wird automatisch auf neue Datenstände geprüft.'
     :'Verbunden: '+handle.name+'. Beim nächsten Öffnen muss die Ordnerfreigabe einmal bestätigt werden.';
 }
+async function promoteStageCache(){
+  const stage=await caches.open(STAGE_CACHE);
+  const active=await caches.open(CACHE);
+  const requests=await stage.keys();
+  const indexUrl=new URL('app/index.html',location.href).href;
+  const normal=requests.filter(r=>r.url!==indexUrl&&r.url!==READY_URL);
+  const indexReq=requests.find(r=>r.url===indexUrl);
+  const readyReq=requests.find(r=>r.url===READY_URL);
+  for(const req of normal){
+    const resp=await stage.match(req);
+    if(resp)await active.put(req,resp);
+  }
+  if(indexReq){
+    const resp=await stage.match(indexReq);
+    if(resp)await active.put(indexReq,resp);
+  }
+  if(readyReq){
+    const resp=await stage.match(readyReq);
+    if(resp)await active.put(readyReq,resp);
+  }
+  const keep=new Set(requests.map(r=>r.url));
+  const activeRequests=await active.keys();
+  for(const req of activeRequests){if(!keep.has(req.url))await active.delete(req);}
+  await caches.delete(STAGE_CACHE);
+}
 async function installEncryptedFile(file,manifest,key){
   const fileBytes=new Uint8Array(await file.arrayBuffer());
   const digest=hex(await crypto.subtle.digest('SHA-256',fileBytes));
@@ -279,19 +307,17 @@ async function installEncryptedFile(file,manifest,key){
   const plain=await decryptPackage(fileBytes,key);
   const version=manifest&&manifest.version?manifest.version:CURRENT_VERSION;
   const date=manifest&&manifest.date?manifest.date:'2026-09-25';
-  const cacheName=safeCacheName(version,digest);
   try{
-    const count=await cacheTarGz(plain,cacheName,{version,date,sha256:digest});
-    await writePointer({cacheName,version,date,sha256:digest,activatedAt:new Date().toISOString()});
+    const count=await cacheTarGz(plain,STAGE_CACHE,{version,date,sha256:digest});
+    await promoteStageCache();
     await settingSet('cryptoKey',key);
-    const keys=await caches.keys();
-    await Promise.all(keys.filter(k=>k.startsWith(DYNAMIC_CACHE_PREFIX)&&k!==cacheName).map(k=>caches.delete(k)));
     return {count,version,date,sha256:digest};
   }catch(e){
-    await caches.delete(cacheName);
+    await caches.delete(STAGE_CACHE);
     throw e;
   }
 }
+
 async function prepareFolderCandidate(handle,manifest){
   const fh=await handle.getFileHandle(manifest.file);
   const f=await fh.getFile();
@@ -428,7 +454,7 @@ $('openCached').addEventListener('click',async()=>{
 });
 $('resetCache').addEventListener('click',async()=>{
   const keys=await caches.keys();
-  await Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)||k.startsWith(DYNAMIC_CACHE_PREFIX)||k===META_CACHE).map(k=>caches.delete(k)));
+  await Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)||k.startsWith(DYNAMIC_CACHE_PREFIX)||k===META_CACHE||k===STAGE_CACHE).map(k=>caches.delete(k)));
   await settingDelete('cryptoKey').catch(()=>{});
   status('Lokale Vertragsdaten wurden gelöscht. Die Teams-Ordnerverbindung bleibt erhalten.','ok');
   await refreshState();
