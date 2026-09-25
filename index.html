@@ -29,7 +29,7 @@ input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padd
 </head>
 <body>
 <main>
-  <div class="brand"><div class="mark">B</div><div><b>REHA Vertragsnavigator</b><small>geschützter Hub-Zugang · v19.3</small></div></div>
+  <div class="brand"><div class="mark">B</div><div><b>REHA Vertragsnavigator</b><small>geschützter Hub-Zugang · v19.4</small></div></div>
   <h1>Vertragsmanager öffnen</h1>
   <p class="lead">Vertrags-, Preis- und Dokumentdaten werden nicht öffentlich veröffentlicht. Auf einem neuen Gerät wird der freigegebene Datenstand einmalig lokal eingerichtet.</p>
 
@@ -49,14 +49,14 @@ input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padd
 
     <section class="box">
       <b><span class="step">1</span>Aktuelles Datenpaket herunterladen</b>
-      <div class="file"><a class="download" id="downloadPackage" href="https://ottobockglobal.sharepoint.com/teams/REHA-Orga/Shared%20Documents/Allgemeines/Vertragsnavigator/REHA-Vertragsmanager-v19.3.enc?download=1" target="_blank" rel="noopener noreferrer">Datenpaket v19.3 herunterladen</a></div>
+      <div class="file"><a class="download" id="downloadPackage" href="https://ottobockglobal.sharepoint.com/teams/REHA-Orga/Shared%20Documents/Allgemeines/Vertragsnavigator/REHA-Vertragsmanager-v19.4.enc?download=1" target="_blank" rel="noopener noreferrer">Datenpaket v19.4 herunterladen</a></div>
       <div class="hint" id="packageHint">Der Download öffnet SharePoint in einem neuen Tab. Falls erforderlich, mit dem Firmenkonto anmelden. Nach dem Download den SharePoint-Tab schließen und hier mit Schritt 2 fortfahren.</div>
     </section>
 
     <section class="box" id="setupBox">
       <b><span class="step">2</span>Heruntergeladene Datei auswählen</b>
       <div class="file"><label class="fakebtn secondary" for="payloadFile">Datei auswählen</label><input class="hidden" id="payloadFile" type="file" accept=".enc,application/octet-stream"><span id="fileName">Noch keine Datei gewählt</span></div>
-      <div class="hint">Erwartete Datei: REHA-Vertragsmanager-v19.3.enc</div>
+      <div class="hint">Erwartete Datei: REHA-Vertragsmanager-v19.4.enc</div>
     </section>
 
     <section class="box" id="keyBox">
@@ -70,15 +70,15 @@ input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padd
 
   <div class="status" id="status"></div>
   <div class="progress" id="progressWrap" hidden><div class="bar" id="bar"></div></div>
-  <div class="meta"><span>Erwarteter Datenstand: v19.3 · 23.09.2026</span><span>Nur autorisierte Nutzung</span></div>
+  <div class="meta"><span>Erwarteter Datenstand: v19.4 · 25.09.2026</span><span>Nur autorisierte Nutzung</span></div>
 </main>
 <script>
 'use strict';
-const EXPECTED_SHA='425231efaba2176e1df1f1b5e5136ea92e181eab7c95efd829c7b5df3ba64001';
+const EXPECTED_SHA='ab0456901048c2a397014a6fabbedbbd95aa292be40b248a603c556492dd4c34';
 const AAD=new TextEncoder().encode('REHA-Vertragsmanager-v19-pages-targz');
-const CACHE='reha-v19-secure-v19-3';
+const CACHE='reha-v19-secure-v19-4';
 const CACHE_PREFIX='reha-v19-secure-';
-const CURRENT_VERSION='v19.3';
+const CURRENT_VERSION='v19.4';
 
 const $=id=>document.getElementById(id);
 let selectedFile=null;
@@ -149,7 +149,7 @@ $('unlock').addEventListener('click',async()=>{
     $('unlock').disabled=true;status('Datenpaket wird geprüft …');progress(5);
     const fileBytes=new Uint8Array(await selectedFile.arrayBuffer());
     const digest=hex(await crypto.subtle.digest('SHA-256',fileBytes));
-    if(digest!==EXPECTED_SHA)throw new Error('Das ausgewählte Datenpaket entspricht nicht dem freigegebenen v19.3-Stand.');
+    if(digest!==EXPECTED_SHA)throw new Error('Das ausgewählte Datenpaket entspricht nicht dem freigegebenen v19.4-Stand.');
     progress(15);status('Datenpaket wird entschlüsselt …');
     const magic=new TextDecoder().decode(fileBytes.slice(0,5));if(magic!=='RV19T')throw new Error('Ungültiges Datenpaket.');
     const iv=fileBytes.slice(5,17), cipher=fileBytes.slice(17); const rawKey=b64urlBytes($('accessKey').value);
