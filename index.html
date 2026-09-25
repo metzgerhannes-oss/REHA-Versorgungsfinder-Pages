@@ -43,9 +43,10 @@ input[type=password]{width:100%;border:1px solid #cbd5da;border-radius:10px;padd
 
   <section class="box auto" id="autoBox">
     <b>Automatische Datenupdates aus Teams <span class="pill" id="autoBadge">nicht verbunden</span></b>
-    <div class="hint" id="folderStatus">Einmalig den lokal synchronisierten Teams-Ordner „Vertragsnavigator“ verbinden. Danach prüft der Vertragsnavigator beim Start automatisch auf neue Datenstände.</div>
+    <div class="hint" id="folderStatus">Zentraler Teams-Ordner ist fest hinterlegt. Für automatische Updates muss auf jedem PC nur einmal der lokal synchronisierte Ordner „Vertragsnavigator“ freigegeben werden.</div>
     <div class="file">
-      <button class="secondary" id="connectFolder">Teams-Datenordner verbinden</button>
+      <a class="secondary" id="openTeamsFolder" href="https://ottobockglobal.sharepoint.com/:f:/r/teams/REHA-Orga/Shared%20Documents/Allgemeines/Vertragsnavigator?d=wb9f02f6ff820446caa6e1810999f0561&csf=1&web=1&e=lT3p5O" target="_blank" rel="noopener noreferrer">Teams-Ordner öffnen</a>
+      <button class="secondary" id="connectFolder">Lokalen Sync-Ordner einmalig verbinden</button>
       <button class="secondary hidden" id="checkUpdates">Jetzt auf Updates prüfen</button>
       <button class="secondary hidden" id="disconnectFolder">Verbindung lösen</button>
     </div>
@@ -260,14 +261,14 @@ async function getStoredKey(){try{return await settingGet('cryptoKey')||null;}ca
 async function updateFolderUI(){
   const handle=await getStoredFolder();
   const key=await getStoredKey();
-  $('connectFolder').textContent=handle?'Teams-Datenordner neu wählen':'Teams-Datenordner verbinden';
+  $('connectFolder').textContent=handle?'Lokalen Sync-Ordner neu wählen':'Lokalen Sync-Ordner einmalig verbinden';
   $('checkUpdates').classList.toggle('hidden',!handle);
   $('disconnectFolder').classList.toggle('hidden',!handle);
   $('autoKeyRow').classList.toggle('hidden',!handle||!!key);
   $('autoKeyHint').classList.toggle('hidden',!handle||!!key);
   $('autoBadge').textContent=handle?'verbunden':'nicht verbunden';
   if(!handle){
-    $('folderStatus').textContent='Einmalig den lokal synchronisierten Teams-Ordner „Vertragsnavigator“ verbinden. Danach prüft der Vertragsnavigator beim Start automatisch auf neue Datenstände.';
+    $('folderStatus').textContent='Zentraler Teams-Ordner ist fest hinterlegt. Für automatische Updates muss auf diesem PC nur einmal der lokal synchronisierte Ordner „Vertragsnavigator“ freigegeben werden.';
     return;
   }
   const p=await getFolderPermission(handle,false).catch(()=>null);
