@@ -10,6 +10,7 @@ self.addEventListener('fetch',event=>{
       const c=await caches.open(CACHE);
       let r=await c.match(event.request,{ignoreSearch:true});
       if(!r && (event.request.mode==='navigate'||u.pathname.endsWith('/app')||u.pathname.endsWith('/app/'))){r=await c.match(new URL('app/index.html',self.registration.scope).href);}
+      if(!r&&event.request.mode==='navigate')return Response.redirect(self.registration.scope,302);
       return r||new Response('Lokaler Datenstand nicht eingerichtet.',{status:404,headers:{'Content-Type':'text/plain; charset=utf-8'}});
     })());
   }
