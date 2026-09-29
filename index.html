@@ -228,7 +228,7 @@ async function cacheState(){
       const rr=await c.match(READY_URL);
       if(rr){
         const m=await rr.clone().json().catch(()=>null);
-        if(m)return Object.assign({ready:true,old:m.version!==CURRENT_VERSION,cacheName:k},m);
+        if(m)return Object.assign({ready:false,old:true,legacy:true,cacheName:k},m);
       }
     }
     return {ready:false,old:keys.some(k=>k.startsWith(CACHE_PREFIX)||k===STAGE_CACHE)};
