@@ -1,42 +1,35 @@
-REHA Vertragsnavigator v19.4 – Secure Pages Shell
+# VN 2.0 Launcher – Pages/Teams-Trennung
 
-Dieses öffentliche Repository enthält ausschließlich die technische Startoberfläche.
-Es enthält keine Vertrags-, Preis-, Kassen-, IK- oder Vertragsdokumentdaten.
+## GitHub Pages
+Nur diese kleinen Dateien veröffentlichen:
+- `index.html`
+- `launcher.js`
+- `sw.js`
+- `.nojekyll`
 
-Automatische Updates ohne Graph / Entra:
-1. Der Teams-/SharePoint-Ordner „Vertragsnavigator“ wird über OneDrive/Teams lokal auf dem Windows-PC synchronisiert.
-2. Im Ordner liegen immer:
-   - REHA-Vertragsmanager-current.enc
-   - version.json
-3. Der Anwender verbindet diesen lokalen Ordner einmalig über „Teams-Datenordner verbinden“.
-4. Der Ordnerzugriff wird browserseitig gespeichert. Je nach Browser-Sicherheitsstatus kann die Freigabe nach einem Neustart erneut bestätigt werden müssen.
-5. Der Zugangsschlüssel wird einmalig eingegeben. Gespeichert wird nur ein nicht exportierbarer CryptoKey im Browser, nicht der Klartext-Schlüssel.
-6. Beim Start und vor dem Öffnen des Vertragsmanagers wird version.json geprüft.
-7. Ist ein neuerer Datenstand vorhanden, wird REHA-Vertragsmanager-current.enc lokal gelesen, per SHA-256 geprüft, entschlüsselt und in den Produktiv-Cache übernommen.
-8. Der bisherige Datenstand bleibt während Download/Prüfung/Entschlüsselung bestehen. Erst nach erfolgreicher Vorbereitung wird der neue Stand in den Produktiv-Cache übertragen.
-9. Bei fehlerhafter Prüfsumme, falschem Schlüssel oder unvollständig synchronisierter Datei bleibt der bisherige produktive Datenstand erhalten.
+**Nicht** auf GitHub Pages veröffentlichen:
+- `version.json` des VN-Datenstands
+- `*.enc` Datenpakete
+- Zugangsschlüssel
 
-Wichtig für neue Releases im Teams-Ordner:
-- Zuerst REHA-Vertragsmanager-current.enc vollständig ersetzen/synchronisieren lassen.
-- Danach version.json als letzten Schritt aktualisieren.
-- So erkennen Clients den neuen Stand erst, wenn das Paket bereits vollständig vorliegt.
+## Teams / SharePoint
+In einen lokal synchronisierten Ordner legen:
+- `version.json`
+- die in `version.json.file` genannte versionsspezifische `.enc`-Datei
+- optional `PRUEFSUMMEN.txt`
 
-version.json Schema:
-{
-  "schema": 1,
-  "version": "v19.4",
-  "date": "2026-09-25",
-  "file": "REHA-Vertragsmanager-current.enc",
-  "sha256": "4f14c85d5b69bd92a6fa15d73d551d6ae36f2a6c1655fd2c37095443a6fbdefa"
-}
+Der Anwender gibt diesen lokalen Sync-Ordner im Launcher einmal frei.
 
-Fallback:
-Die Startseite unterstützt weiterhin die manuelle Auswahl einer .enc-Datei.
+## Update-Sicherheit
+Eine neue Version wird nur aktiviert, wenn:
+1. `version.json` gelesen werden kann,
+2. SHA-256 der `.enc`-Datei exakt übereinstimmt,
+3. AES-GCM-Entschlüsselung erfolgreich ist,
+4. das tar.gz extrahiert werden kann,
+5. `index.html` im Runtime-Cache vorhanden ist.
 
-Sicherheitsregeln:
-- Kein Zugangsschlüssel im öffentlichen Repository.
-- Keine Vertrags- oder Preisdokumente im öffentlichen Repository.
-- Automatische Ordnerupdates benötigen einen aktuellen Chromium-Browser (Edge oder Chrome).
-- Der lokale Teams-Ordner muss für den Benutzer bereits über die bestehende Firmenumgebung synchronisiert sein.
+Bis dahin bleibt die zuletzt erfolgreich geprüfte Runtime aktiv.
 
-Fallback-Datenpaket-SHA256: 4f14c85d5b69bd92a6fa15d73d551d6ae36f2a6c1655fd2c37095443a6fbdefa
+## Zugangsschlüssel
+Der Schlüssel ist Base64URL. Der Launcher normalisiert `-`/`_` und fehlendes Padding korrekt.
+Nach erfolgreicher Einrichtung versucht der Launcher einen nicht exportierbaren WebCrypto-AES-Schlüssel in IndexedDB zu speichern.
