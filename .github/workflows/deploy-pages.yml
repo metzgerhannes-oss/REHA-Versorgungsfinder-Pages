@@ -27,12 +27,14 @@ jobs:
         run: |
           set -euo pipefail
           test -s index.html
+          test -s launcher.js
           test -s sw.js
           test -s README.md
 
           rm -rf _site
           mkdir _site
           cp index.html _site/index.html
+          cp launcher.js _site/launcher.js
           cp sw.js _site/sw.js
           cp README.md _site/README.txt
           touch _site/.nojekyll
@@ -43,9 +45,11 @@ jobs:
             exit 1
           fi
 
-          grep -q "REHA Vertragsnavigator" _site/index.html
-          grep -q "EXPECTED_SHA='4f14c85d5b69bd92a6fa15d73d551d6ae36f2a6c1655fd2c37095443a6fbdefa'" _site/index.html
-          grep -q "serviceWorker.register('./sw.js'" _site/index.html
+          grep -q "VN 2.0" _site/index.html
+          grep -q 'src="launcher.js"' _site/index.html
+          grep -q "decodeAccessKey" _site/launcher.js
+          grep -q "replace(/-/g,'+')" _site/launcher.js
+          grep -q "serviceWorker.register('./sw.js?v=2'" _site/launcher.js
 
       - name: GitHub Pages konfigurieren
         uses: actions/configure-pages@v5
