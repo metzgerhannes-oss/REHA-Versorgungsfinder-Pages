@@ -1,7 +1,9 @@
-# Vertragsnavigator-Pages
+# Vertragsnavigator – Deployment
 
-Öffentliches Pages-Repository für VN 2.0.
+Öffentliches Deployment-Repository für den Vertragsnavigator 2.1.
 
-Keine Vertragsdaten, Datenpakete, Zugangsschlüssel oder sonstigen Geheimnisse hier ablegen.
+Die Quellanwendung, Datenbankmigrationen und Fachlogik liegen in `patientcareassistent-lab/Vertragsnavigator`. Dieses Repository enthält ausschließlich die statische Weboberfläche.
 
-Die produktive Anwendung wird aus dem privaten Repository `patientcareassistent-lab/Vertragsnavigator` gebaut. Dieses Repository bleibt als separates öffentliches Pages-Ziel bzw. Fallback bestehen.
+Vertragsdaten werden nicht in GitHub Pages gespeichert. Nach Anmeldung liest die Oberfläche ausschließlich die freigegebenen Supabase-Views des separaten Projekts `Vertragsnavigator`.
+
+Deployment: GitHub Pages (`main`, GitHub Actions).
