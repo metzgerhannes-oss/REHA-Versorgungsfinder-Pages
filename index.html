@@ -337,10 +337,15 @@ function tokenVariants(token){
     }
   }
   const aliases={
-    rolli:['rollstuhl','rollstuehl'],
+    rolli:['rollstuhl','rollstuehl','rollstuhle'],
     rollstuhl:['rolli'],
     rollstuehle:['rollstuhl','rolli'],
+    rollstuhle:['rollstuhl','rolli'],
     leichtgewichts:['leichtgewicht'],
+    aktivrollstuhl:['aktiv','aktive nutzung','aktiven nutzung','spezialrollstuhl'],
+    aktivrollstuhle:['aktiv','aktive nutzung','aktiven nutzung','spezialrollstuhl'],
+    aktivrollstuehle:['aktiv','aktive nutzung','aktiven nutzung','spezialrollstuhl'],
+    aktivstuhl:['aktiv','aktive nutzung','spezialrollstuhl'],
     eRolli:['elektrorollstuhl']
   }
   for(const alias of aliases[token]||[]) out.add(normalizeSearch(alias))
@@ -394,7 +399,7 @@ async function searchAssistant(e){
     return
   }
 
-  let query=supabase.from('vn_position_catalog').select('*').limit(500)
+  let query=supabase.from('vn_position_catalog').select('*').limit(1000)
   if(tokens.length){
     const variants=[...new Set(tokens.flatMap(tokenVariants))].slice(0,12)
     const filters=[]
@@ -407,6 +412,17 @@ async function searchAssistant(e){
     query=query.or(filters.join(','))
   }
   if(pg) query=query.eq('pg',pg)
+  if(payer){
+    const p=normalizeSearch(payer)
+    const payerAliases={tk:['tk','techniker'],aok:['aok'],barmer:['barmer'],dak:['dak'],ikk:['ikk'],bkk:['bkk']}
+    const variants=payerAliases[p]||[p]
+    const payerFilters=[]
+    for(const variant of variants){
+      const pattern='%'+variant+'%'
+      payerFilters.push('family.ilike.'+pattern,'contract.ilike.'+pattern)
+    }
+    query=query.or(payerFilters.join(','))
+  }
 
   const {data,error}=await query
   if(error){showError('appError',error.message);return}
