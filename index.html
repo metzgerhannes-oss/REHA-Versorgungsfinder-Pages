@@ -39,7 +39,7 @@
       <span class="eyebrow">brillinger | ottobock.care</span>
       <h1>Vertragsnavigator 2.1</h1>
       <p>Geschützter Zugriff auf Vertragsdaten, Vertragswissen und Vertragsfragen.</p>
-      <label>E-Mail<input id="email" type="email" autocomplete="username" required /></label>
+      <label>Benutzername<input id="username" type="text" autocomplete="username" placeholder="Mitarbeiter1" required /></label>
       <label>Passwort<input id="password" type="password" autocomplete="current-password" required /></label>
       <div id="loginError" class="alert error hidden"></div>
       <button class="primary" type="submit">Anmelden</button>
@@ -175,7 +175,9 @@
 
     $('loginForm').addEventListener('submit',async e=>{
       e.preventDefault();showError('loginError','')
-      const {error}=await supabase.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value})
+      const login=$('username').value.trim()
+      const email=login.includes('@')?login:login.toLowerCase()+'@vertragsnavigator.test'
+      const {error}=await supabase.auth.signInWithPassword({email,password:$('password').value})
       if(error) showError('loginError',error.message)
     })
     $('logout').addEventListener('click',()=>supabase.auth.signOut())
