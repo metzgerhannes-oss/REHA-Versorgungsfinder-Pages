@@ -294,7 +294,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const nf=new Intl.NumberFormat('de-DE')
 const views=['assistant','contracts','upload','changes','questions','data']
 let session=null,contracts=[],knowledge=[],questions=[],sites=[],selectedPosition=null,currentResults=[],mode='versorger'
-let dataRetryTimer=null,dataRetryCount=0
+let dataRetryTimer=null
 
 function showError(id,message){const el=$(id);el.textContent=message||'';el.classList.toggle('hidden',!message)}
 function role(){return session?.user?.app_metadata?.vn_role||'versorger'}
@@ -560,19 +560,22 @@ async function loadData(){
     const raw=String(first.message||'')
     const recovering=/not accepting connections|starting up|hot standby|timeout/i.test(raw)
     showError('appError',recovering
-      ? 'Vertragsdatenbank wird gerade wiederhergestellt. Kassen, Produktgruppen und Standorte werden automatisch neu geladen.'
+      ? 'Vertragsdatenbank befindet sich in Wiederherstellung. Die Anwendung prüft den Zugriff frühestens in 60 Sekunden erneut.'
       : raw)
-    if(!contracts.length) setFilterLoading(recovering?'Kassen werden erneut geladen …':'Kassen konnten nicht geladen werden')
-    if(recovering && dataRetryCount<8){
-      dataRetryCount+=1
-      clearTimeout(dataRetryTimer)
-      dataRetryTimer=setTimeout(loadData,Math.min(8000+dataRetryCount*4000,30000))
+    if(!contracts.length) setFilterLoading(recovering?'Kassen derzeit nicht verfügbar':'Kassen konnten nicht geladen werden')
+    if(recovering && !dataRetryTimer){
+      dataRetryTimer=setTimeout(()=>{
+        dataRetryTimer=null
+        loadData()
+      },60000)
     }
     return
   }
 
-  dataRetryCount=0
-  clearTimeout(dataRetryTimer)
+  if(dataRetryTimer){
+    clearTimeout(dataRetryTimer)
+    dataRetryTimer=null
+  }
   questions=qr.data||[];knowledge=kr.data||[];contracts=cr.data||[]
   const siteMap=new Map()
   for(const e of (sr.data||[])){
