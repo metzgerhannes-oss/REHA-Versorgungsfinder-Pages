@@ -294,6 +294,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const nf=new Intl.NumberFormat('de-DE')
 const views=['assistant','contracts','upload','changes','questions','data']
 let session=null,contracts=[],knowledge=[],questions=[],sites=[],selectedPosition=null,currentResults=[],mode='versorger'
+let dataRetryTimer=null,dataRetryCount=0
 
 function showError(id,message){const el=$(id);el.textContent=message||'';el.classList.toggle('hidden',!message)}
 function role(){return session?.user?.app_metadata?.vn_role||'versorger'}
@@ -312,12 +313,29 @@ function setView(view){
 }
 function uniq(values){return [...new Set(values.filter(Boolean).map(v=>String(v).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'de'))}
 function flatten(value){return Array.isArray(value)?value:[value]}
+function setFilterLoading(message='Filterdaten werden geladen …'){
+  $('assistantPayer').disabled=true
+  $('assistantPg').disabled=true
+  $('assistantSite').disabled=true
+  $('assistantPayer').innerHTML='<option value="">'+esc(message)+'</option>'
+  $('assistantPg').innerHTML='<option value="">Produktgruppen werden geladen …</option>'
+  $('assistantSite').innerHTML='<option value="">Standorte werden geladen …</option>'
+}
 function fillAssistantFilters(){
+  const payerValue=$('assistantPayer').value
+  const pgValue=$('assistantPg').value
+  const siteValue=$('assistantSite').value
   const payers=uniq(contracts.flatMap(r=>flatten(r.payer_families)))
   const pgs=uniq(contracts.flatMap(r=>flatten(r.product_groups)))
   $('assistantPayer').innerHTML='<option value="">Alle Kassen</option>'+payers.map(v=>'<option>'+esc(v)+'</option>').join('')
   $('assistantPg').innerHTML='<option value="">Alle PG</option>'+pgs.map(v=>'<option>'+esc(v)+'</option>').join('')
   $('assistantSite').innerHTML='<option value="">Standort wählen</option>'+sites.map(s=>'<option value="'+esc(s.site_id)+'">'+esc((s.branch||'Standort')+(s.ik?' · IK '+s.ik:''))+'</option>').join('')
+  $('assistantPayer').disabled=false
+  $('assistantPg').disabled=false
+  $('assistantSite').disabled=false
+  if([...$('assistantPayer').options].some(o=>o.value===payerValue)) $('assistantPayer').value=payerValue
+  if([...$('assistantPg').options].some(o=>o.value===pgValue)) $('assistantPg').value=pgValue
+  if([...$('assistantSite').options].some(o=>o.value===siteValue)) $('assistantSite').value=siteValue
 }
 function renderContracts(query=''){
   const q=String(query||'').trim().toLowerCase()
@@ -526,6 +544,7 @@ async function searchAssistant(e){
 }
 async function loadData(){
   showError('appError','')
+  if(!contracts.length) setFilterLoading()
   const [cc,pc,kc,qr,kr,cr,sr]=await Promise.all([
     supabase.from('vn_contract_catalog').select('*',{count:'exact',head:true}),
     supabase.from('vn_position_catalog').select('*',{count:'exact',head:true}),
@@ -535,8 +554,25 @@ async function loadData(){
     supabase.from('vn_contract_catalog').select('*').order('contract_name').limit(700),
     supabase.from('vn_site_eligibility').select('*').limit(5000)
   ])
+
   const first=[cc,pc,kc,qr,kr,cr,sr].find(x=>x.error)?.error
-  if(first) showError('appError',first.message)
+  if(first){
+    const raw=String(first.message||'')
+    const recovering=/not accepting connections|starting up|hot standby|timeout/i.test(raw)
+    showError('appError',recovering
+      ? 'Vertragsdatenbank wird gerade wiederhergestellt. Kassen, Produktgruppen und Standorte werden automatisch neu geladen.'
+      : raw)
+    if(!contracts.length) setFilterLoading(recovering?'Kassen werden erneut geladen …':'Kassen konnten nicht geladen werden')
+    if(recovering && dataRetryCount<8){
+      dataRetryCount+=1
+      clearTimeout(dataRetryTimer)
+      dataRetryTimer=setTimeout(loadData,Math.min(8000+dataRetryCount*4000,30000))
+    }
+    return
+  }
+
+  dataRetryCount=0
+  clearTimeout(dataRetryTimer)
   questions=qr.data||[];knowledge=kr.data||[];contracts=cr.data||[]
   const siteMap=new Map()
   for(const e of (sr.data||[])){
